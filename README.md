@@ -1,11 +1,10 @@
 # DiscordRPC
 A GUI That allows you to customise your Discord Rich Precence
+# Linux
 
-## Linux
+__Compiled__
+- `./discordrpc`
 
-Compiled
-`./discordrpc`
-
-Python
+__Python__
 - `pip install pypresence`
 - `python discordrpc.py`

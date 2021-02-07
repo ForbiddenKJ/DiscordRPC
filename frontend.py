@@ -1,14 +1,24 @@
-import gi.repository
+import gi
 
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib, GObject
 from backend import discordrpc
+import threading
 import sys
+import json
 
 class Window(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title = 'Discord RPC')
+
+        # Quit Window and Program
+        def stop(x, y):
+            Gtk.main_quit(x, y)
+            sys.exit()
+
+        # Connect
+        self.connect('delete-event', stop)
 
         # Main Grid
         self.grid = Gtk.Grid()
@@ -77,39 +87,76 @@ class Window(Gtk.Window):
         self.set_status = Gtk.Button(label = 'Set Status')
         self.set_status.connect('clicked', self.set_status_func)
 
+        # Save Button
+        self.save_button = Gtk.Button(label = 'Save')
+        self.save_button.connect('clicked', self.save_func)
+
+        # Load Button
+        self.load_button = Gtk.Button(label = 'Load')
+        self.load_button.connect('clicked', self.load_func)
+
+        # Button Box
+        self.button_box = Gtk.Box(spacing = 5)
+        self.button_box.pack_start(self.set_status, True, True, 0)
+        self.button_box.pack_start(self.save_button, True, True, 0)
+        self.button_box.pack_start(self.load_button, True, True, 0)
+
+
         # Widget Adds
         self.grid.attach(self.branding, 0, 0, 2, 1)
         self.grid.attach(self.client_id_box, 0, 1, 2, 1)
         self.grid.attach(self.state_box, 0, 2, 2, 1)
         self.grid.attach(self.details_box, 0, 3, 2, 1)
-        self.grid.attach(self.large_image_box, 0, 4, 2, 1)
-        self.grid.attach(self.small_image_box, 0, 5, 2, 1)
-        self.grid.attach(self.set_status, 0, 6, 2, 1)
+        self.grid.attach(self.large_image_box, 0, 4, 1, 1)
+        self.grid.attach(self.small_image_box, 0, 5, 1, 1)
+        self.grid.attach(self.button_box, 0, 6, 3, 2)
 
         self.handler = None
 
-    def set_status_func(self, widget):
+    def get_info(self):
         getText = lambda x: x.get_properties('text')[0]
 
-        C_ID = getText(self.client_id_entry)
-        state = getText(self.state_entry)
-        details = getText(self.details_entry)
-        large_image = getText(self.large_image_entry)
-        small_image = getText(self.small_image_entry)
+        # Get Input Results
 
-        print(C_ID, state, details)
+        self.C_ID = getText(self.client_id_entry)
+        self.state = getText(self.state_entry)
+        self.details = getText(self.details_entry)
+        self.large_image = getText(self.large_image_entry)
+        self.small_image = getText(self.small_image_entry)
 
-        self.handler = discordrpc(C_ID, state, details)
+    def set_status_func(self, widget):
+
+        # Get Info
+
+        self.get_info()
+
+        # Set Discord Status and Thread
+
+        self.handler = discordrpc(self.C_ID, self.state, self.details, self.large_image, self.small_image)
+        self.handler.flickSwitch()
         self.handler.connect()
         self.handler.updateStatus()
         self.handler.stayConnected()
 
-def stop(x, y):
-    Gtk.main_quit(x, y)
-    sys.exit()
+        return
+
+    def save_func(self, widget):
+        self.get_info()
+
+        with open('./data.json', 'w') as file:
+            file.write(json.dumps({"C_ID": self.C_ID, "state": self.state, "details": self.details, "large_image": self.large_image, "small_image": self.small_image}))
+
+    def load_func(self, widget):
+        with open('./data.json', 'r') as file:
+            self.data = json.loads(file.read())
+
+        self.client_id_entry.set_text(self.data['C_ID'])
+        self.state_entry.set_text(self.data['state'])
+        self.details_entry.set_text(self.data['details'])
+        self.large_image_entry.set_text(self.data['large_image'])
+        self.small_image_entry.set_text(self.data['small_image'])
 
 def run():
     window = Window()
-    window.connect('delete-event', stop)
     window.show_all()
     Gtk.main()

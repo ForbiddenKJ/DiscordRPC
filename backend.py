@@ -13,8 +13,16 @@ class discordrpc:
         self.doConnection = True
         self.RPC = None
 
-        if large_image == '': large_image = None
-        if small_image == '': small_image = None
+        if self.large_image == '': self.large_image = None
+        if self.small_image == '': self.small_image = None
+
+    def switch(self) -> bool:
+        self.doConnection = not self.doConnection
+        return self.doConnection
+
+    def flickSwitch(self):
+        self.switch()
+        self.switch()
 
     def connect(self) -> bool:
         #try:
@@ -33,7 +41,7 @@ class discordrpc:
             update = self.RPC.update(state=self.state,
                                 details=self.details,
                                 large_image=self.large_image,
-                                small_image=self.small_img)
+                                small_image=self.small_image)
 
         elif self.small_image is None:
             update = self.RPC.update(state=self.state,
@@ -57,4 +65,8 @@ class discordrpc:
 
     def stayConnected(self):
         self.threaded = threading.Thread(target=self._stayConnected)
+        self.threaded.daemon = True
         self.threaded.start()
+
+        return
+        # self.threaded.join()

@@ -1,72 +1,77 @@
 from pypresence import Presence
-import threading
+import multiprocessing as mp
+
 import time
 
 
-class discordrpc:
-    def __init__(self, C_ID : str, state : str, details : str, large_image : str = None, small_image : str = None):
+
+class discordrpc():
+    def __init__(self):
+        self.activeProcess = []
+
+    def connect(self, C_ID : str) -> bool:
         self.C_ID = C_ID
-        self.state = state
-        self.details = details
-        self.large_image = large_image
-        self.small_image = small_image
-        self.doConnection = True
-        self.RPC = None
-
-        if self.large_image == '': self.large_image = None
-        if self.small_image == '': self.small_image = None
-
-    def switch(self) -> bool:
-        self.doConnection = not self.doConnection
-        return self.doConnection
-
-    def flickSwitch(self):
-        self.switch()
-        self.switch()
-
-    def connect(self) -> bool:
-        #try:
         self.RPC = Presence(self.C_ID,pipe=0)
         self.RPC.connect()
 
         return True
 
-        # TODO: Add specific error checks
-        #except:
-            #return False
+    def updateVariables(self, C_ID, state, details, large_image = None, small_image = None):
+        self.C_ID = C_ID
+        self.state = state
+        self.details = details
+        self.large_image = large_image
+        self.small_image = small_image
 
-    def updateStatus(self) -> bool:
-        # try:
+        if self.large_image == '': self.large_image = None
+        if self.small_image == '': self.small_image = None
+
+    def updateStatus(self):
         if self.large_image is not None and self.small_image is not None:
             update = self.RPC.update(state=self.state,
                                 details=self.details,
                                 large_image=self.large_image,
                                 small_image=self.small_image)
 
-        elif self.small_image is None:
+        if self.small_image is None:
             update = self.RPC.update(state=self.state,
                                 details=self.details,
                                 large_image=self.large_image)
 
-        elif self.large_image is None:
+        if self.large_image is None:
             update = self.RPC.update(state=self.state,
                                 details=self.details)
 
-        return True
+    def stopConnection(self):
+        kills = 0
+        for x, i in enumerate(self.activeProcess):
+            i.kill()
+            del self.activeProcess[x]
+            kills += 1
 
-
-        # TODO: Add specific error checks
-        # except:
-        #     return False
+        if kills > 1:
+            print('WARNING: ',kills, 'Connection(s) Killed')
 
     def _stayConnected(self):
-        while self.doConnection:
+        while True:
+            self.updateStatus()
             time.sleep(15)
 
+        return
+
     def stayConnected(self):
-        self.threaded = threading.Thread(target=self._stayConnected)
-        self.threaded.daemon = True
-        self.threaded.start()
+
+        self.stopConnection()
+
+        self.activeProcess.append(True)
+        self.activeProcess[-1] = mp.Process(target=self._stayConnected, daemon=True)
+
+        #self.process.daemon = True
+        self.activeProcess[-1].start()
 
         return
-        # self.threaded.join()
+
+    def backProcess(self, C_ID, state, details, large_image = None, small_image = None):
+
+        self.updateVariables(C_ID, state, details, large_image, small_image)
+        self.stayConnected()

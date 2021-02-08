@@ -4,12 +4,13 @@ gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk, GLib, GObject
 from backend import discordrpc
-import threading
 import sys
 import json
 
 class Window(Gtk.Window):
     def __init__(self):
+        self.connectCalled = False
+
         Gtk.Window.__init__(self, title = 'Discord RPC')
 
         # Quit Window and Program
@@ -111,11 +112,11 @@ class Window(Gtk.Window):
         self.grid.attach(self.small_image_box, 0, 5, 1, 1)
         self.grid.attach(self.button_box, 0, 6, 3, 2)
 
-        self.handler = None
+        self.handler = discordrpc()
 
     def get_info(self):
         getText = lambda x: x.get_properties('text')[0]
-
+        #self.handler.updateStatus()
         # Get Input Results
 
         self.C_ID = getText(self.client_id_entry)
@@ -130,13 +131,12 @@ class Window(Gtk.Window):
 
         self.get_info()
 
-        # Set Discord Status and Thread
+        if self.connectCalled == False or self.C_ID != self.connectCalled:
+            self.handler.connect(self.C_ID)
+            self.connectCalled = self.C_ID
 
-        self.handler = discordrpc(self.C_ID, self.state, self.details, self.large_image, self.small_image)
-        self.handler.flickSwitch()
-        self.handler.connect()
-        self.handler.updateStatus()
-        self.handler.stayConnected()
+        # Set Discord Status and Thread
+        self.handler.backProcess(self.C_ID, self.state, self.details, self.large_image, self.small_image)
 
         return
 

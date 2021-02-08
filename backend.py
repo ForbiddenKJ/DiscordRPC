@@ -66,7 +66,6 @@ class discordrpc():
         self.activeProcess.append(True)
         self.activeProcess[-1] = mp.Process(target=self._stayConnected, daemon=True)
 
-        #self.process.daemon = True
         self.activeProcess[-1].start()
 
         return

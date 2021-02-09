@@ -9,7 +9,11 @@ import json
 
 class Window(Gtk.Window):
     def __init__(self):
+        ## Variables
+
         self.connectCalled = False
+
+        ## Window Level Code
 
         Gtk.Window.__init__(self, title = 'Discord RPC')
 
@@ -21,6 +25,8 @@ class Window(Gtk.Window):
         # Connect
         self.connect('delete-event', stop)
 
+        ## Non-Boxbound Widgets
+
         # Main Grid
         self.grid = Gtk.Grid()
         self.add(self.grid)
@@ -28,6 +34,12 @@ class Window(Gtk.Window):
         # Branding Label
         self.branding = Gtk.Label()
         self.branding.set_label('Discord RPC')
+
+        # Preset Label
+        self.preset_label = Gtk.Label()
+        self.preset_label.set_label('Presets')
+
+        ## Define All Widgets
 
         # Client ID
         self.client_id_box = Gtk.Box(spacing = 10)
@@ -102,8 +114,18 @@ class Window(Gtk.Window):
         self.button_box.pack_start(self.save_button, True, True, 0)
         self.button_box.pack_start(self.load_button, True, True, 0)
 
+        ## Preset
 
-        # Widget Adds
+        # CPU & RAM Presets
+        self.usage_button = Gtk.Button(label = 'Usage')
+        self.usage_button.connect('clicked', self.usage_func)
+
+        # Preset Box
+        self.preset_box = Gtk.Box(spacing = 5)
+        self.preset_box.pack_start(self.usage_button, True, True, 0)
+
+        ## Widget Adds
+
         self.grid.attach(self.branding, 0, 0, 2, 1)
         self.grid.attach(self.client_id_box, 0, 1, 2, 1)
         self.grid.attach(self.state_box, 0, 2, 2, 1)
@@ -111,12 +133,14 @@ class Window(Gtk.Window):
         self.grid.attach(self.large_image_box, 0, 4, 1, 1)
         self.grid.attach(self.small_image_box, 0, 5, 1, 1)
         self.grid.attach(self.button_box, 0, 6, 3, 2)
+        self.grid.attach(self.preset_label, 2, 0, 2, 1)
+        self.grid.attach(self.preset_box, 2, 1, 2, 1)
 
         self.handler = discordrpc()
 
     def get_info(self):
         getText = lambda x: x.get_properties('text')[0]
-        #self.handler.updateStatus()
+
         # Get Input Results
 
         self.C_ID = getText(self.client_id_entry)
@@ -155,6 +179,23 @@ class Window(Gtk.Window):
         self.details_entry.set_text(self.data['details'])
         self.large_image_entry.set_text(self.data['large_image'])
         self.small_image_entry.set_text(self.data['small_image'])
+
+    def usage_func(self, widget):
+        ## Define Usage Preset Variables
+
+        self.C_ID = '808689187799826494'
+        self.state = 'CPU: [CPU]% RAM: [RAM]%'
+        self.details = 'RAM & CPU Usage'
+        self.large_image = 'large'
+
+        if self.connectCalled == False or self.C_ID != self.connectCalled:
+            self.handler.connect(self.C_ID)
+            self.connectCalled = self.C_ID
+
+        self.handler.cpuUsage(self.C_ID, self.state, self.details, self.large_image)
+
+        return
+
 
 def run():
     window = Window()

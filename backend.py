@@ -1,9 +1,11 @@
+## Import
+
 from pypresence import Presence
 import multiprocessing as mp
 import psutil
 import time
 
-
+## Main Class
 
 class discordrpc:
     def __init__(self):
@@ -82,8 +84,6 @@ class discordrpc:
             cpu = round(psutil.cpu_percent(),1)
             mem = round(psutil.virtual_memory().percent,1)
             state = self.state.replace('[CPU]', str(cpu)).replace('[RAM]', str(mem))
-
-            print(cpu, mem)
 
             if self.large_image is not None and self.small_image is not None:
                 update = self.RPC.update(state=state,

@@ -1,3 +1,5 @@
+## Import
+
 import gi
 
 gi.require_version('Gtk', '3.0')
@@ -6,6 +8,8 @@ from gi.repository import Gtk, GLib, GObject
 from backend import discordrpc
 import sys
 import json
+
+## Main Class
 
 class Window(Gtk.Window):
     def __init__(self):
@@ -42,7 +46,7 @@ class Window(Gtk.Window):
         ## Define All Widgets
 
         # Client ID
-        self.client_id_box = Gtk.Box(spacing = 10)
+        self.client_id_box = Gtk.Box(spacing = 1)
 
         self.client_id_label = Gtk.Label()
         self.client_id_label.set_label('Client ID:')
@@ -108,11 +112,16 @@ class Window(Gtk.Window):
         self.load_button = Gtk.Button(label = 'Load')
         self.load_button.connect('clicked', self.load_func)
 
+        # Stop Button
+        self.stop_button = Gtk.Button(label = 'Stop')
+        self.stop_button.connect('clicked', self.stop_func)
+
         # Button Box
         self.button_box = Gtk.Box(spacing = 5)
         self.button_box.pack_start(self.set_status, True, True, 0)
         self.button_box.pack_start(self.save_button, True, True, 0)
         self.button_box.pack_start(self.load_button, True, True, 0)
+        self.button_box.pack_start(self.stop_button, True, True, 0)
 
         ## Preset
 
@@ -149,6 +158,8 @@ class Window(Gtk.Window):
         self.large_image = getText(self.large_image_entry)
         self.small_image = getText(self.small_image_entry)
 
+        return self.C_ID, self.state, self.details, self.large_image, self.small_image
+
     def set_status_func(self, widget):
 
         # Get Info
@@ -165,6 +176,9 @@ class Window(Gtk.Window):
         return
 
     def save_func(self, widget):
+
+        # Get Info
+
         self.get_info()
 
         with open('./data.json', 'w') as file:
@@ -180,22 +194,38 @@ class Window(Gtk.Window):
         self.large_image_entry.set_text(self.data['large_image'])
         self.small_image_entry.set_text(self.data['small_image'])
 
+    def stop_func(self, widget):
+        self.handler.stopConnection()
+
     def usage_func(self, widget):
+
+        # Get Info
+
+        print(self.get_info())
+
         ## Define Usage Preset Variables
 
-        self.C_ID = '808689187799826494'
-        self.state = 'CPU: [CPU]% RAM: [RAM]%'
-        self.details = 'RAM & CPU Usage'
-        self.large_image = 'large'
+        if self.C_ID == '':
+            self.C_ID = '808689187799826494'
+
+        if self.state == '':
+            self.state = 'CPU: [CPU]% RAM: [RAM]%'
+
+        if self.details == '':
+            self.details = 'RAM & CPU Usage'
+
+        if self.large_image is not None:
+            self.large_image = 'large'
 
         if self.connectCalled == False or self.C_ID != self.connectCalled:
             self.handler.connect(self.C_ID)
             self.connectCalled = self.C_ID
 
-        self.handler.cpuUsage(self.C_ID, self.state, self.details, self.large_image)
+        self.handler.cpuUsage(self.C_ID, self.state, self.details, self.large_image, self.small_image)
 
         return
 
+## Run Function
 
 def run():
     window = Window()

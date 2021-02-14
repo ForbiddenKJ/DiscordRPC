@@ -201,7 +201,7 @@ class Window(Gtk.Window):
 
         # Get Info
 
-        print(self.get_info())
+        self.get_info()
 
         ## Define Usage Preset Variables
 

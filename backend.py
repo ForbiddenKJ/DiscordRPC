@@ -102,48 +102,26 @@ class discordrpc:
         return
 
     def realTimeCPUUpdateLoop(self):
+        template = self.state
+
         while True:
             cpu = round(psutil.cpu_percent(),1)
             mem = round(psutil.virtual_memory().percent,1)
-            state = self.state.replace('[CPU]', str(cpu)).replace('[RAM]', str(mem))
+            self.state = template.replace('[CPU]', str(cpu)).replace('[RAM]', str(mem))
 
-            if self.large_image is not None and self.small_image is not None:
-                update = self.RPC.update(state=state,
-                                    details=self.details,
-                                    large_image=self.large_image,
-                                    small_image=self.small_image)
-
-            if self.small_image is None:
-                update = self.RPC.update(state=state,
-                                    details=self.details,
-                                    large_image=self.large_image)
-
-            if self.large_image is None:
-                update = self.RPC.update(state=state,
-                                    details=self.details)
+            self.updateStatus()
 
             time.sleep(15)
 
     # Epoch Realtime Display
 
     def realTimeEpochUpdateLoop(self):
+        template = 'Epoch [EPOCH]'
+
         while True:
             epoch = time.time()
-            state = "Time Epoch: " + str(epoch)
+            self.state = template.replace('[EPOCH]', str(epoch))
 
-            if self.large_image is not None and self.small_image is not None:
-                update = self.RPC.update(state=state,
-                                    details=self.details,
-                                    large_image=self.large_image,
-                                    small_image=self.small_image)
-
-            if self.small_image is None:
-                update = self.RPC.update(state=state,
-                                    details=self.details,
-                                    large_image=self.large_image)
-
-            if self.large_image is None:
-                update = self.RPC.update(state=state,
-                                    details=self.details)
+            self.updateStatus()
 
             time.sleep(15)

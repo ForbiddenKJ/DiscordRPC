@@ -49,8 +49,18 @@ class discordrpc:
             del self.activeProcess[x]
             kills += 1
 
+        self.RPC.clear()
+
         if kills > 1:
             print('WARNING: ',kills, 'Connection(s) Killed')
+
+        def disconnect(self):
+            # Clean Close
+
+            self.stopConnection()
+
+            # Close
+            self.RPC.close()
 
     def _stayConnected(self):
         while True:
@@ -79,7 +89,19 @@ class discordrpc:
 
     # CPU & RAM Realtime Display
 
-    def realTimeUpdateLoop(self):
+    def customRPC(self, function : str, C_ID : str, state : str, details : str, large_image : str = None, small_image : str = None):
+        self.updateVariables(C_ID, state, details, large_image, small_image)
+
+        self.stopConnection()
+
+        self.activeProcess.append(True)
+        self.activeProcess[-1] = mp.Process(target=eval(function), daemon=True)
+
+        self.activeProcess[-1].start()
+
+        return
+
+    def realTimeCPUUpdateLoop(self):
         while True:
             cpu = round(psutil.cpu_percent(),1)
             mem = round(psutil.virtual_memory().percent,1)
@@ -101,15 +123,3 @@ class discordrpc:
                                     details=self.details)
 
             time.sleep(15)
-
-    def cpuUsage(self, C_ID : str, state : str, details : str, large_image : str = None, small_image : str = None):
-        self.updateVariables(C_ID, state, details, large_image, small_image)
-
-        self.stopConnection()
-
-        self.activeProcess.append(True)
-        self.activeProcess[-1] = mp.Process(target=self.realTimeUpdateLoop, daemon=True)
-
-        self.activeProcess[-1].start()
-
-        return

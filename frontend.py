@@ -221,7 +221,7 @@ class Window(Gtk.Window):
             self.handler.connect(self.C_ID)
             self.connectCalled = self.C_ID
 
-        self.handler.cpuUsage(self.C_ID, self.state, self.details, self.large_image, self.small_image)
+        self.handler.customRPC('self.realTimeCPUUpdateLoop', self.C_ID, self.state, self.details, self.large_image, self.small_image)
 
         return
 

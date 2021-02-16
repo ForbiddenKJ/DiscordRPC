@@ -123,3 +123,27 @@ class discordrpc:
                                     details=self.details)
 
             time.sleep(15)
+
+    # Epoch Realtime Display
+
+    def realTimeEpochUpdateLoop(self):
+        while True:
+            epoch = time.time()
+            state = "Time Epoch: " + str(epoch)
+
+            if self.large_image is not None and self.small_image is not None:
+                update = self.RPC.update(state=state,
+                                    details=self.details,
+                                    large_image=self.large_image,
+                                    small_image=self.small_image)
+
+            if self.small_image is None:
+                update = self.RPC.update(state=state,
+                                    details=self.details,
+                                    large_image=self.large_image)
+
+            if self.large_image is None:
+                update = self.RPC.update(state=state,
+                                    details=self.details)
+
+            time.sleep(15)

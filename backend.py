@@ -67,8 +67,6 @@ class discordrpc:
             self.updateStatus()
             time.sleep(15)
 
-        return
-
     def stayConnected(self):
 
         self.stopConnection()
@@ -77,8 +75,6 @@ class discordrpc:
         self.activeProcess[-1] = mp.Process(target=self._stayConnected, daemon=True)
 
         self.activeProcess[-1].start()
-
-        return
 
     def backProcess(self, C_ID, state, details, large_image = None, small_image = None):
 
@@ -89,17 +85,15 @@ class discordrpc:
 
     # CPU & RAM Realtime Display
 
-    def customRPC(self, function : str, C_ID : str, state : str, details : str, large_image : str = None, small_image : str = None):
+    def customRPC(self, function, C_ID : str, state : str, details : str, large_image : str = None, small_image : str = None):
         self.updateVariables(C_ID, state, details, large_image, small_image)
 
         self.stopConnection()
 
         self.activeProcess.append(True)
-        self.activeProcess[-1] = mp.Process(target=eval(function), daemon=True)
+        self.activeProcess[-1] = mp.Process(target=function, daemon=True)
 
         self.activeProcess[-1].start()
-
-        return
 
     def realTimeCPUUpdateLoop(self):
         template = self.state
